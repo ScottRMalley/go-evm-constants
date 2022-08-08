@@ -2,19 +2,20 @@ package networks
 
 import "math/big"
 
-var AVALANCHE Name = "avax"
+var AVALANCHE_MAINNET Name = "avax"
 
-var AVALANCHE_BLOCKCHAIN = Blockchain{
-	Mainnet: Network{
-		Name:    AVALANCHE,
-		RpcUrl:  "https://api.avax.network/ext/bc/C/rpc",
-		ChainId: big.NewInt(43114),
-		Testnet: false,
-	},
-	Testnet: Network{
-		Name:    AVALANCHE,
-		RpcUrl:  "https://api.avax-test.network/ext/bc/C/rpc",
-		ChainId: big.NewInt(43113),
-		Testnet: true,
-	},
+var avalancheMainnet = Network{
+	Name:    AVALANCHE_MAINNET,
+	RpcUrl:  "https://api.avax.network/ext/bc/C/rpc",
+	ChainId: big.NewInt(43114),
+	Testnet: false,
+}
+
+var AVALANCHE_FUJI Name = "avax-fuji"
+
+var avalancheFuji = Network{
+	Name:    AVALANCHE_FUJI,
+	RpcUrl:  "https://api.avax-test.network/ext/bc/C/rpc",
+	ChainId: big.NewInt(43113),
+	Testnet: true,
 }

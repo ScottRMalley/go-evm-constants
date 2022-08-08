@@ -9,6 +9,7 @@ import (
 var (
 	ErrDexNotFound         = errors.New("no dex with provided name")
 	ErrNetworkNotSupported = errors.New("the given dex is not supported on the network")
+	ErrEmptyDex            = errors.New("cannot register empty dex")
 )
 
 type Name string
@@ -18,19 +19,23 @@ type Contracts struct {
 	Factory common.Address
 }
 
-type NetworkDex struct {
-	Mainnet Contracts
-	Testnet Contracts
-}
-
 type Dex struct {
 	Name     Name
-	Networks map[networks.Name]NetworkDex
+	Networks map[networks.Name]Contracts
 }
 
-var dexMap = map[Name]Dex{}
+func (d Dex) Supports(network networks.Name) bool {
+	_, ok := d.Networks[network]
+	return ok
+}
 
-func GetContracts(name Name, network networks.Name, testnet bool) (Contracts, error) {
+var dexMap = map[Name]Dex{
+	PANGOLIN:   pangolinDex,
+	SUSHISWAP:  sushiswapDex,
+	TRADER_JOE: traderJoeDex,
+}
+
+func GetContracts(name Name, network networks.Name) (Contracts, error) {
 	dex, ok := dexMap[name]
 	if !ok {
 		return Contracts{}, ErrDexNotFound
@@ -39,10 +44,21 @@ func GetContracts(name Name, network networks.Name, testnet bool) (Contracts, er
 	if !ok {
 		return Contracts{}, ErrNetworkNotSupported
 	}
-	if testnet && contracts.Testnet != (Contracts{}) {
-		return contracts.Testnet, nil
-	} else if contracts.Mainnet != (Contracts{}) {
-		return contracts.Mainnet, nil
+	return contracts, nil
+}
+
+func RegisterDex(dex Dex) error {
+	if dex.Name == "" {
+		return ErrEmptyDex
 	}
-	return Contracts{}, ErrNetworkNotSupported
+	dexMap[dex.Name] = dex
+	return nil
+}
+
+func SupportsNetwork(name Name, network networks.Name) (bool, error) {
+	dex, ok := dexMap[name]
+	if !ok {
+		return false, ErrDexNotFound
+	}
+	return dex.Supports(network), nil
 }

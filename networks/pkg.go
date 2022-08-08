@@ -6,7 +6,8 @@ import (
 )
 
 var ErrNetworkNotFound = errors.New("could not find network")
-var ErrCantRegisterEmptyBlockchain = errors.New("can't register empty blockchain")
+var ErrChainIdNotFound = errors.New("could not find network with specified chain id")
+var ErrCantRegisterEmptyNetwork = errors.New("can't register empty network")
 
 type Name string
 
@@ -17,36 +18,38 @@ type Network struct {
 	Testnet bool
 }
 
-type Blockchain struct {
-	Mainnet Network
-	Testnet Network
+var networkMap = map[Name]Network{
+	ETHEREUM_MAINNET:  ethereum,
+	ETHEREUM_GOERLI:   ethereumGoerli,
+	AVALANCHE_MAINNET: avalancheMainnet,
+	AVALANCHE_FUJI:    avalancheFuji,
+	BSC_MAINNET:       bscMainnet,
+	BSC_TESTNET:       bscTestnet,
+	POLYGON_MAINNET:   polygonMainnet,
+	POLYGON_TESTNET:   polygonTestnet,
 }
 
-var blockchainMap = map[Name]Blockchain{
-	ETHEREUM:  ETHEREUM_BLOCKCHAIN,
-	AVALANCHE: AVALANCHE_BLOCKCHAIN,
-	BSC:       BSC_BLOCKCHAIN,
-	POLYGON:   POLYGON_BLOCKCHAIN,
-}
-
-func GetNetwork(name Name, testnet bool) (Network, error) {
-	if bc, ok := blockchainMap[name]; !ok {
-		return Network{}, ErrNetworkNotFound
+func GetNetwork(name Name) (Network, error) {
+	if net, ok := networkMap[name]; ok {
+		return net, nil
 	} else {
-		if testnet && bc.Testnet != (Network{}) {
-			return bc.Testnet, nil
-		} else if bc.Mainnet != (Network{}) {
-			return bc.Mainnet, nil
-		} else {
-			return Network{}, ErrNetworkNotFound
+		return Network{}, ErrNetworkNotFound
+	}
+}
+
+func RegisterNetwork(network Network) error {
+	if network.Name == "" {
+		return ErrCantRegisterEmptyNetwork
+	}
+	networkMap[network.Name] = network
+	return nil
+}
+
+func NameFrom(chainId *big.Int) (Name, error) {
+	for name, network := range networkMap {
+		if network.ChainId.String() == chainId.String() {
+			return name, nil
 		}
 	}
-}
-
-func RegisterBlockchain(name Name, bc Blockchain) error {
-	if bc.Mainnet == (Network{}) && bc.Testnet == (Network{}) {
-		return ErrCantRegisterEmptyBlockchain
-	}
-	blockchainMap[name] = bc
-	return nil
+	return "", ErrChainIdNotFound
 }

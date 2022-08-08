@@ -8,7 +8,7 @@ contract addresses for the following chains:
 * Binance Smart Chain
 * Ethereum
 
-## Usage
+## Networks
 
 Using network constants:
 
@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	avaxTestnet, err := networks.GetNetwork(networks.AVALANCHE, true)
+	avaxTestnet, err := networks.GetNetwork(networks.AVALANCHE_FUJI)
 	if err != nil {
 		panic(err)
 	}
@@ -42,26 +42,47 @@ import (
 )
 
 func main() {
-	customNetworkName := NetworkName("custom")
-	customBc := networks.Blockchain{
-		Mainnet: Network{
-			Name:    customNetworkName,
-			RpcUrl:  "https://network.custom.rpc/",
-			ChainId: big.NewInt(1234),
-			Testnet: false,
-		},
+	customNetworkName := networks.Name("custom")
+	customNetwork := networks.Network{
+		Name:    customNetworkName,
+		RpcUrl:  "https://network.custom.rpc/",
+		ChainId: big.NewInt(1234),
+		Testnet: false,
 	}
-	
-	if err := networks.RegisterBlockchain(customNetworkName, customBc); err != nil {
+
+	if err := networks.RegisterNetwork(customNetwork); err != nil {
 		panic(err)
-    }
+	}
 	// this should now work
-	customNetwork, err := networks.GetNetwork(customNetworkName, false)
+	customNetwork, err := networks.GetNetwork(customNetworkName)
 	...
 }
 ```
 
-## Known Missing Elements
+## Contracts
 
-Currently, there is no support for multiple testnet networks on one blockchain. This is primarily relevant to 
-Ethereum, as it has Goerli, Ropsten etc. For simplicity at this time, we default Eth testnet to Goerli.
+Currently, this repo holds mainnet and testnet addresses for the following DEX's:
+
+* Pangolin
+* Sushiswap
+* TraderJoe
+
+This will be continually expanded with more relevant or important contract addresses.
+
+Getting contract addresses:
+```go
+package main
+
+import (
+	"github.com/scottrmalley/go-evm-constants/contracts/dex"
+	"github.com/scottrmalley/go-evm-constants/networks"
+)
+
+func main() {
+	contracts, err := dex.GetContracts(dex.SUSHISWAP, networks.AVALANCHE_MAINNET)
+	if err != nil {
+		panic(err)
+    }
+	...
+}
+```

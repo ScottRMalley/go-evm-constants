@@ -18,11 +18,12 @@ func TestNetworkTestSuite(t *testing.T) {
 
 func (s *NetworkTestSuite) TestNetworkNameDefaults() {
 	t := s.T()
-	names := []Name{BSC, ETHEREUM, AVALANCHE, POLYGON}
+	mainnetNames := []Name{BSC_MAINNET, ETHEREUM_MAINNET, AVALANCHE_MAINNET, POLYGON_MAINNET}
+	testnetNames := []Name{BSC_TESTNET, ETHEREUM_GOERLI, AVALANCHE_FUJI, POLYGON_TESTNET}
 
 	t.Run("should have properly configured mainnets", func(t *testing.T) {
-		for _, name := range names {
-			mainnet, err := GetNetwork(name, false)
+		for _, name := range mainnetNames {
+			mainnet, err := GetNetwork(name)
 			require.NoError(t, err, "should not produce an error when fetching known network")
 			assert.NotEmpty(t, mainnet, "should not return empty network")
 			assert.False(t, mainnet.Testnet, "mainnet should not be marked as testnet")
@@ -30,8 +31,8 @@ func (s *NetworkTestSuite) TestNetworkNameDefaults() {
 	})
 
 	t.Run("should have properly configured testnets", func(t *testing.T) {
-		for _, name := range names {
-			testnet, err := GetNetwork(name, true)
+		for _, name := range testnetNames {
+			testnet, err := GetNetwork(name)
 			require.NoError(t, err, "should not return an error when fetching known network")
 			assert.NotEmpty(t, testnet, "should not return an empty network")
 			assert.Truef(t, testnet.Testnet, "testnet should be marked as testnet: %s", name)
@@ -43,28 +44,23 @@ func (s *NetworkTestSuite) TestCustomNetworkNames() {
 	t := s.T()
 	customNetworkName := Name("custom")
 
-	t.Run("should fail to register empty blockchain", func(t *testing.T) {
-		err := RegisterBlockchain(customNetworkName, Blockchain{})
+	t.Run("should fail to register empty network", func(t *testing.T) {
+		err := RegisterNetwork(Network{})
 		require.Error(t, err, "should return error on failed network registration")
-
-		custom, err := GetNetwork(customNetworkName, true)
-		require.Error(t, err, "should return err for unregistered network")
-		assert.Empty(t, custom, "should return empty for unknown network")
 	})
 
 	t.Run("should register a properly configured blockchain", func(t *testing.T) {
-		bc := Blockchain{
-			Mainnet: Network{
-				RpcUrl:  "http://rpc.custom.io/",
-				ChainId: big.NewInt(1234),
-				Name:    customNetworkName,
-				Testnet: false,
-			},
+		network := Network{
+			RpcUrl:  "http://rpc.custom.io/",
+			ChainId: big.NewInt(1234),
+			Name:    customNetworkName,
+			Testnet: false,
 		}
-		err := RegisterBlockchain(customNetworkName, bc)
+
+		err := RegisterNetwork(network)
 		require.NoError(t, err)
 
-		custom, err := GetNetwork(customNetworkName, false)
+		custom, err := GetNetwork(customNetworkName)
 		require.NoError(t, err, "should not return an err for registered network")
 		require.NotEmpty(t, custom, "should not return empty blockchain for registered network")
 
