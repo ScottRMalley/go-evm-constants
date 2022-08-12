@@ -53,3 +53,19 @@ func NameFrom(chainId *big.Int) (Name, error) {
 	}
 	return "", ErrChainIdNotFound
 }
+
+func SupportedNetworks() []Name {
+	var supported []Name
+	for name := range networkMap {
+		supported = append(supported, name)
+	}
+	return supported
+}
+
+func Supported(name string) (Name, bool) {
+	networkName := Name(name)
+	if _, ok := networkMap[networkName]; ok {
+		return networkName, true
+	}
+	return "", false
+}
