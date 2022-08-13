@@ -56,7 +56,7 @@ func NameFrom(chainId *big.Int) (Name, error) {
 
 func ChainIdFrom(name Name) (*big.Int, error) {
 	if network, ok := networkMap[name]; !ok {
-		return 0, ErrNetworkNotFound
+		return nil, ErrNetworkNotFound
 	} else {
 		return network.ChainId, nil
 	}
