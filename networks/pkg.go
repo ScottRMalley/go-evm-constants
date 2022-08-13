@@ -54,6 +54,14 @@ func NameFrom(chainId *big.Int) (Name, error) {
 	return "", ErrChainIdNotFound
 }
 
+func ChainIdFrom(name Name) (*big.Int, error) {
+	if network, ok := networkMap[name]; !ok {
+		return 0, ErrNetworkNotFound
+	} else {
+		return network.ChainId, nil
+	}
+}
+
 func SupportedNetworks() []Name {
 	var supported []Name
 	for name := range networkMap {
