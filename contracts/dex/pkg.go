@@ -33,6 +33,7 @@ var dexMap = map[Name]Dex{
 	PANGOLIN:   pangolinDex,
 	SUSHISWAP:  sushiswapDex,
 	TRADER_JOE: traderJoeDex,
+	UNISWAP:    uniswapDex,
 }
 
 func GetContracts(name Name, network networks.Name) (Contracts, error) {
